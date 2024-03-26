@@ -16,7 +16,7 @@
 #define APPLE_STRING "●"
 
 bool gameOver;
-int x, y, fruitX, fruitY, score;
+int x, y, appleX, appleY, score;
 int tailX[BOARD_SIZE-2], tailY[BOARD_SIZE-2];
 console::Key dir = console::K_LEFT;
 int nTail;
@@ -29,10 +29,22 @@ void Setup() {
 	x = BOARD_SIZE / 2;
 	y = BOARD_SIZE / 2;
   nTail = 0;
-	fruitX = rand() % (BOARD_SIZE-3)+1;
-	fruitY = rand() % (BOARD_SIZE-3)+1;
+	appleX = rand() % (BOARD_SIZE-3)+1;
+	appleY = rand() % (BOARD_SIZE-3)+1;
 	score = 0;
   count = 0;
+}
+//랜덤으로 만들어낸 사과가 꼬리랑 겹치는 위치인지 체크하고 다시 생성.
+void isAppleOnTail(int appleX, int appleY, int tailX[], int tailY[], int nTail) {
+    for (int k = 0; k < nTail; k++) {
+        if (appleX == tailX[k] && appleY == tailY[k]) {
+          	appleX = rand() % (BOARD_SIZE-3)+1;
+          	appleY = rand() % (BOARD_SIZE-3)+1;
+            isAppleOnTail(appleX, appleY, tailX, tailY, nTail);
+        }
+        else 
+          break;
+    }
 }
 
 void draw() {
@@ -50,17 +62,10 @@ void draw() {
 			  if (j == BOARD_SIZE) console::draw(BOARD_SIZE,i, WALL_VERTICAL_STRING);
 			    if (j == x && i == y)
 				    console::draw(j,i, SNAKE_STRING);
-			    else if (j == fruitX && i == fruitY){
+			    else if (j == appleX && i == appleY){
             //apple위치와 꼬리의 위치가 겹치는지 확인
-            for(int k = 0; k<nTail; k++)
-              if(fruitX==tailX[k] && fruitY==tailY[k]){
-                fruitX = rand() % (BOARD_SIZE-3)+1;
-	              fruitY = rand() % (BOARD_SIZE-3)+1;
-              }
-              else{
-				        console::draw(j,i, APPLE_STRING);
-                break;
-              }
+            isAppleOnTail(appleX, appleY, tailX, tailY, nTail);
+            console::draw(j,i,APPLE_STRING);
             }
 			    else {
 				    bool print = false;
@@ -159,10 +164,10 @@ void Logic() {
     y++;
   }
 	
-	if (x == fruitX && y == fruitY) {
+	if (x == appleX && y == appleY) {
 		score += 10;
-	  fruitX = rand() % (BOARD_SIZE-3)+1;
-	  fruitY = rand() % (BOARD_SIZE-3)+1;
+	  appleX = rand() % (BOARD_SIZE-3)+1;
+	  appleY = rand() % (BOARD_SIZE-3)+1;
 		nTail++;
 	}
 }
